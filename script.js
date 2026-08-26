@@ -3,32 +3,56 @@ const gifImage = document.getElementById("gifImage");
 const loading = document.getElementById("loading");
 const errorMsg = document.getElementById("error");
 
-// Public Giphy beta key, provided by Giphy for demos/testing.
-const GIPHY_API_KEY = "dc6zaTOxFJmzC";
-const GIPHY_RANDOM_URL = `https://api.giphy.com/v1/gifs/random?api_key=${GIPHY_API_KEY}&tag=ai&rating=g`;
+// Curated list of direct GIF links (no API key needed, so it can't be rate-limited or banned).
+const GIF_URLS = [
+  "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif",
+  "https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif",
+  "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
+  "https://media.giphy.com/media/3orieWY8QCRWn7lnym/giphy.gif",
+  "https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif",
+  "https://media.giphy.com/media/26gs6qmhSGjkzql4o/giphy.gif",
+  "https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif",
+  "https://media.giphy.com/media/3og0IPxMM0erATueVW/giphy.gif",
+  "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif",
+  "https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif",
+  "https://media.giphy.com/media/l41lFw057lAJQMwg0/giphy.gif",
+  "https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif",
+  "https://media.giphy.com/media/xUPGcguWZHRC2HyBRS/giphy.gif",
+  "https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif",
+  "https://media.giphy.com/media/xT5LMzIK1v4Ge2Jn3O/giphy.gif",
+  "https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif",
+  "https://media.giphy.com/media/l2JJyLbhqCF4va86Y/giphy.gif",
+];
 
-async function fetchRandomGif() {
+function pickRandomGifUrl(excludeUrl) {
+  let url = excludeUrl;
+  while (url === excludeUrl) {
+    url = GIF_URLS[Math.floor(Math.random() * GIF_URLS.length)];
+  }
+  return url;
+}
+
+function showRandomGif() {
   gifImage.hidden = true;
   errorMsg.hidden = true;
   loading.hidden = false;
   btn.disabled = true;
 
-  try {
-    const response = await fetch(GIPHY_RANDOM_URL);
-    if (!response.ok) throw new Error("Request failed");
+  const url = pickRandomGifUrl(gifImage.dataset.currentUrl);
 
-    const data = await response.json();
-    const url = data?.data?.images?.original?.url;
-    if (!url) throw new Error("No image found");
-
-    gifImage.src = url;
+  gifImage.onload = () => {
     gifImage.hidden = false;
-  } catch (err) {
-    errorMsg.hidden = false;
-  } finally {
     loading.hidden = true;
     btn.disabled = false;
-  }
+  };
+  gifImage.onerror = () => {
+    errorMsg.hidden = false;
+    loading.hidden = true;
+    btn.disabled = false;
+  };
+
+  gifImage.dataset.currentUrl = url;
+  gifImage.src = url;
 }
 
-btn.addEventListener("click", fetchRandomGif);
+btn.addEventListener("click", showRandomGif);
