@@ -32,13 +32,8 @@ function pickRandomGifUrl(excludeUrl) {
   return url;
 }
 
-function showRandomGif() {
-  gifImage.hidden = true;
-  errorMsg.hidden = true;
-  loading.hidden = false;
-  btn.disabled = true;
-
-  const url = pickRandomGifUrl(gifImage.dataset.currentUrl);
+function tryLoadGif(triesLeft, excludeUrl) {
+  const url = pickRandomGifUrl(excludeUrl);
 
   gifImage.onload = () => {
     gifImage.hidden = false;
@@ -46,13 +41,27 @@ function showRandomGif() {
     btn.disabled = false;
   };
   gifImage.onerror = () => {
-    errorMsg.hidden = false;
-    loading.hidden = true;
-    btn.disabled = false;
+    if (triesLeft > 0) {
+      tryLoadGif(triesLeft - 1, url);
+    } else {
+      errorMsg.hidden = false;
+      loading.hidden = true;
+      btn.disabled = false;
+    }
   };
 
   gifImage.dataset.currentUrl = url;
   gifImage.src = url;
+}
+
+function showRandomGif() {
+  gifImage.hidden = true;
+  errorMsg.hidden = true;
+  loading.hidden = false;
+  btn.disabled = true;
+
+  // Retry a few times with a different GIF in case one link happens to fail.
+  tryLoadGif(3, gifImage.dataset.currentUrl);
 }
 
 btn.addEventListener("click", showRandomGif);
